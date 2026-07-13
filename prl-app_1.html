@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PRL App</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --blue: #1d4ed8; --blue-light: #eff6ff; --blue-mid: #3b82f6;
+  --green: #16a34a; --green-light: #f0fdf4;
+  --orange: #ea580c; --orange-light: #fff7ed;
+  --red: #dc2626;
+  --whatsapp: #25d366; --whatsapp-light: #e7fdf1;
+  --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db;
+  --gray-400: #9ca3af; --gray-500: #6b7280; --gray-700: #374151; --gray-900: #111827;
+  --white: #ffffff; --radius: 12px; --font: 'Inter', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family: var(--font); background: var(--gray-100); color: var(--gray-900); min-height: 100vh; max-width: 480px; margin: 0 auto; padding-bottom: 70px; }
+
+.app-header { background: var(--blue); padding: 16px 20px 14px; position: sticky; top: 0; z-index: 100; }
+.app-header-top { display: flex; align-items: center; justify-content: space-between; }
+.app-header-title { font-size: 16px; font-weight: 700; color: white; display:flex; align-items:center; gap:8px; }
+.app-header-btn { background: rgba(255,255,255,0.15); border: none; color: white; font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 20px; font-family: var(--font); cursor: pointer; }
+.progress-bar { height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; margin-top: 12px; }
+.progress-fill { height: 100%; background: white; border-radius: 10px; transition: width 0.4s ease; }
+.app-header-step { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 6px; font-weight: 500; }
+
+.main-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: white; border-top: 1px solid var(--gray-200); display: flex; z-index: 500; padding-bottom: env(safe-area-inset-bottom, 0); }
+.main-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px 8px; background: none; border: none; cursor: pointer; color: var(--gray-400); font-family: var(--font); }
+.main-nav-item.active { color: var(--blue); }
+.main-nav-icon { font-size: 20px; }
+.main-nav-label { font-size: 10px; font-weight: 600; }
+
+.module { display: none; }
+.module.active { display: block; }
+.screen { display: none; padding: 20px 16px 20px; }
+.screen.active { display: block; }
+
+.step-label { display: inline-flex; align-items: center; gap: 6px; background: var(--blue-light); color: var(--blue); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 20px; margin-bottom: 10px; }
+.screen-title { font-size: 22px; font-weight: 800; color: var(--gray-900); line-height: 1.2; margin-bottom: 6px; }
+.screen-sub { font-size: 14px; color: var(--gray-500); margin-bottom: 20px; line-height: 1.5; }
+
+.card { background: var(--white); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+
+.field { margin-bottom: 16px; }
+.field:last-child { margin-bottom: 0; }
+label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+input[type=text], input[type=number], input[type=tel], input[type=email], select, textarea {
+  width: 100%; border: 2px solid var(--gray-200); border-radius: 10px; padding: 12px 14px;
+  font-family: var(--font); font-size: 15px; color: var(--gray-900); background: var(--white);
+  outline: none; transition: border 0.15s; -webkit-appearance: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--blue-mid); }
+textarea { resize: none; min-height: 70px; line-height: 1.5; }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+.field-hint { font-size: 12px; color: var(--gray-400); margin-top: 5px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 8px 14px; border: 2px solid var(--gray-200); border-radius: 20px; font-size: 13px; font-weight: 500; color: var(--gray-500); cursor: pointer; background: white; font-family: var(--font); }
+.chip.active { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
+
+.list-item { display: flex; align-items: center; gap: 10px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 10px; padding: 11px 14px; margin-bottom: 8px; }
+.list-item-text { flex: 1; font-size: 14px; font-weight: 500; }
+.del-btn { width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--gray-200); color: var(--gray-500); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.add-row { display: flex; gap: 8px; margin-top: 8px; }
+.add-row input { flex: 1; }
+.add-btn { padding: 12px 16px; background: var(--blue); color: white; border: none; border-radius: 10px; font-size: 20px; cursor: pointer; font-family: var(--font); flex-shrink: 0; }
+
+.yn-row { display: flex; gap: 10px; }
+.yn-btn { flex: 1; padding: 14px; border: 2px solid var(--gray-200); border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; text-align: center; background: white; color: var(--gray-500); font-family: var(--font); transition: all 0.15s; }
+.yn-btn.yes.active { border-color: var(--green); background: var(--green-light); color: var(--green); }
+.yn-btn.no.active { border-color: var(--gray-400); background: var(--gray-100); color: var(--gray-700); }
+
+.sensible-card { background: var(--orange-light); border: 1.5px solid #fed7aa; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.sensible-title { font-size: 13px; font-weight: 700; color: var(--orange); margin-bottom: 8px; }
+
+.inst-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.inst-item { border: 2px solid var(--gray-200); border-radius: 10px; padding: 12px 10px; text-align: center; cursor: pointer; background: white; transition: all 0.15s; }
+.inst-item.active { border-color: var(--blue); background: var(--blue-light); }
+.inst-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+.inst-label { font-size: 11px; font-weight: 600; color: var(--gray-500); line-height: 1.3; }
+.inst-item.active .inst-label { color: var(--blue); }
+
+.bottom-nav { position: fixed; bottom: 62px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: white; border-top: 1px solid var(--gray-200); padding: 12px 16px; display: flex; gap: 10px; z-index: 200; }
+.btn-back { padding: 14px 20px; border: 2px solid var(--gray-200); border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--gray-500); background: white; cursor: pointer; font-family: var(--font); flex-shrink: 0; }
+.btn-next { flex: 1; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: var(--font); }
+.btn-next:disabled { background: var(--gray-300); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; font-family: var(--font); width: 100%; }
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:disabled { background: var(--gray-300); }
+.btn-wa { background: var(--whatsapp); color: white; }
+.btn-secondary { background: var(--gray-100); color: var(--gray-700); }
+.btn-sm { padding: 8px 14px; font-size: 12px; width: auto; }
+.btn-green { background: var(--green); color: white; }
+
+.copy-box { background: var(--gray-900); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.copy-box-title { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.copy-text { font-size: 13px; color: #d1fae5; line-height: 1.7; white-space: pre-wrap; font-family: monospace; max-height: 300px; overflow-y: auto; }
+
+.empresa-search { position: relative; }
+.empresa-list { max-height: 240px; overflow-y: auto; border: 2px solid var(--gray-200); border-radius: 10px; margin-top: 6px; }
+.empresa-item { padding: 12px 14px; border-bottom: 1px solid var(--gray-100); cursor: pointer; font-size: 14px; }
+.empresa-item:last-child { border-bottom: none; }
+.empresa-item-name { font-weight: 600; }
+.empresa-item-sub { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
+.empresa-selected { background: var(--blue-light); border: 1.5px solid var(--blue-mid); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.empresa-selected-name { font-size: 14px; font-weight: 700; color: var(--blue); }
+.empresa-selected-sub { font-size: 11px; color: var(--gray-500); margin-top: 1px; }
+.empresa-clear { background: none; border: none; color: var(--gray-400); font-size: 18px; cursor: pointer; padding: 2px 6px; }
+
+.empresas-toolbar { display: flex; gap: 8px; margin-bottom: 14px; }
+.empresas-toolbar input { flex: 1; }
+.add-empresa-btn { background: var(--blue); color: white; border: none; border-radius: 10px; width: 46px; height: 46px; font-size: 22px; cursor: pointer; flex-shrink: 0; }
+.empresa-card { background: white; border-radius: 10px; padding: 14px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 10px; cursor:pointer; }
+.empresa-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+.empresa-card-info { flex: 1; min-width: 0; }
+.empresa-card-name { font-size: 14px; font-weight: 600; }
+.empresa-card-contact { font-size: 11px; color: var(--gray-400); }
+.empresa-card-badge { font-size: 10px; background: var(--green-light); color: var(--green); padding: 2px 8px; border-radius: 10px; font-weight: 700; margin-top: 3px; display:inline-block; }
+.empresa-card-del { background: none; border: none; color: var(--gray-300); font-size: 18px; cursor: pointer; padding: 4px 8px; flex-shrink: 0; }
+
+.empty-state { text-align: center; padding: 30px 20px; color: var(--gray-400); font-size: 13px; }
+.empty-icon { font-size: 32px; display: block; margin-bottom: 8px; }
+
+.tipo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tipo-btn { border: 2px solid var(--gray-200); border-radius: 10px; padding: 12px 10px; text-align: center; cursor: pointer; background: white; transition: all 0.15s; }
+.tipo-btn.active { border-color: var(--blue); background: var(--blue-light); }
+.tipo-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+.tipo-label { font-size: 11px; font-weight: 600; color: var(--gray-700); line-height: 1.3; }
+.tipo-btn.active .tipo-label { color: var(--blue); }
+
+.canal-row { display: flex; gap: 8px; }
+.canal-btn { flex: 1; padding: 12px; border: 2px solid var(--gray-200); border-radius: 10px; text-align: center; cursor: pointer; background: white; font-size: 13px; font-weight: 600; color: var(--gray-500); font-family: var(--font); }
+.canal-btn.active-email { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
+.canal-btn.active-wa { border-color: var(--whatsapp); background: var(--whatsapp-light); color: #128c4a; }
+
+.generating-box { background: var(--blue-light); border: 1.5px solid #bfdbfe; border-radius: var(--radius); padding: 24px; text-align: center; display: none; }
+.generating-box.visible { display: block; }
+.gen-spinner { width: 32px; height: 32px; border: 3px solid #bfdbfe; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.9s linear infinite; margin: 0 auto 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.gen-text { font-size: 13px; color: var(--blue); font-weight: 600; }
+
+.result-box { display: none; }
+.result-box.visible { display: block; }
+.result-title { font-size: 13px; font-weight: 700; color: var(--gray-700); margin-bottom: 8px; }
+.result-content { background: var(--gray-900); color: #e5e7eb; border-radius: 10px; padding: 16px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; font-family: monospace; max-height: 350px; overflow-y: auto; margin-bottom: 10px; }
+.result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.result-actions .btn { flex: 1; min-width: 100px; }
+.ajuste-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.ajuste-chip { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--gray-100); color: var(--gray-500); cursor: pointer; border: none; font-family: var(--font); }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; display: none; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 16px 16px 0 0; padding: 20px 16px 30px; width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
+.modal-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--gray-900); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.3s; z-index: 2000; white-space: nowrap; }
+.toast.show { opacity: 1; }
+
+.divider { height: 1px; background: var(--gray-100); margin: 12px 0; }
+.alert { background: var(--orange-light); border: 1.5px solid #fed7aa; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #9a3412; line-height: 1.5; margin-bottom: 12px; }
+
+.dash-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.dash-stat { background: white; border-radius: 12px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+.dash-stat-num { font-size: 24px; font-weight: 800; color: var(--blue); }
+.dash-stat-label { font-size: 11px; color: var(--gray-500); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+.dash-action { background: white; border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+.dash-action-icon { font-size: 26px; }
+.dash-action-title { font-size: 14px; font-weight: 700; }
+.dash-action-sub { font-size: 12px; color: var(--gray-500); margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<!-- ============ TOP HEADER ============ -->
+<div class="app-header">
+  <div class="app-header-top">
+    <div class="app-header-title" id="app-header-title">🛡️ PRL App</div>
+    <button class="app-header-btn" onclick="openModal('apikey')">🔑 API</button>
+  </div>
+  <div id="progress-wrap" style="display:none;">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:14%"></div></div>
+    <div class="app-header-step" id="header-step">Paso 1 de 7</div>
+  </div>
+</div>
+
+<!-- ============ MODULE: HOME ============ -->
+<div class="module active" id="module-home">
+  <div class="screen active">
+    <div class="screen-title">Hola 👋</div>
+    <div class="screen-sub">Tu sistema PRL en un solo sitio.</div>
+
+    <div class="dash-stats">
+      <div class="dash-stat">
+        <div class="dash-stat-num" id="dash-empresas">0</div>
+        <div class="dash-stat-label">Empresas</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-num" id="dash-visitas">0</div>
+        <div class="dash-stat-label">Visitas hechas</div>
+      </div>
+    </div>
+
+    <div class="dash-action" onclick="goToModule('visita')">
+      <div class="dash-action-icon">📋</div>
+      <div>
+        <div class="dash-action-title">Nueva visita</div>
+        <div class="dash-action-sub">Toma de datos guiada en 7 pasos</div>
+      </div>
+    </div>
+    <div class="dash-action" onclick="goToModule('comunicaciones')">
+      <div class="dash-action-icon">✉️</div>
+      <div>
+        <div class="dash-action-title">Enviar comunicación</div>
+        <div class="dash-action-sub">Email o WhatsApp generado con IA</div>
+      </div>
+    </div>
+    <div class="dash-action" onclick="goToModule('empresas')">
+      <div class="dash-action-icon">🏢</div>
+      <div>
+        <div class="dash-action-title">Ver empresas</div>
+        <div class="dash-action-sub">Tu listado de clientes guardado</div>
+      </div>
+    </div>
+
+    <div class="card" id="home-visitas-recientes" style="margin-top:8px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">📋 Últimas visitas</div>
+      <div id="home-visitas-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODULE: VISITA (7 pasos) ============ -->
+<div class="module" id="module-visita">
+
+  <div class="screen active" id="v-screen-historial">
+    <div class="step-label">📋 Historial</div>
+    <div class="screen-title">Tus visitas guardadas</div>
+    <div class="screen-sub">Toca una visita para ver su resumen, o inicia una nueva.</div>
+    <button class="btn btn-primary" onclick="startNuevaVisita()" style="margin-bottom:16px;">+ Nueva visita</button>
+    <div id="v-historial-list"></div>
+  </div>
+
+  <div class="screen" id="v-screen-1">
+    <div class="step-label">📋 Paso 1</div>
+    <div class="screen-title">Datos de la empresa</div>
+    <div class="screen-sub">Lo básico. Rellena lo que tengas.</div>
+    <div class="card">
+      <div class="field">
+        <label>Empresa ya guardada (opcional)</label>
+        <select id="v-empresa-existente" onchange="v_prefillEmpresa()">
+          <option value="">— Nueva empresa —</option>
+        </select>
+        <div class="field-hint">Si ya la tienes en tu listado, selecciónala y se rellenará sola.</div>
+      </div>
+      <div class="field">
+        <label>Nombre de la empresa *</label>
+        <input type="text" id="v-nombre" placeholder="Restaurante El Pino S.L.">
+      </div>
+      <div class="field">
+        <label>CIF</label>
+        <input type="text" id="v-cif" placeholder="B12345678">
+      </div>
+      <div class="field">
+        <label>Dirección del centro de trabajo</label>
+        <input type="text" id="v-direccion" placeholder="Calle Mayor 5, Pamplona">
+      </div>
+      <div class="field">
+        <label>Nº de trabajadores *</label>
+        <input type="number" id="v-trabajadores" placeholder="15" min="1">
+      </div>
+      <div class="field">
+        <label>Sector de actividad</label>
+        <select id="v-sector">
+          <option value="">Seleccionar...</option>
+          <option>Hostelería / Restauración</option>
+          <option>Oficinas / Administración</option>
+          <option>Comercio / Retail</option>
+          <option>Industria / Almacén</option>
+          <option>Construcción</option>
+          <option>Sanidad / Clínica</option>
+          <option>Transporte / Logística</option>
+          <option>Educación</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Actividad / CNAE</label>
+        <input type="text" id="v-actividad" placeholder="8130 — Actividades de jardinería">
+      </div>
+      <div class="field">
+        <label>Teléfono</label>
+        <input type="tel" id="v-telefono" placeholder="617 645 563">
+      </div>
+      <div class="field">
+        <label>Persona de contacto</label>
+        <input type="text" id="v-contacto" placeholder="Ion del Río — Encargado">
+      </div>
+      <div class="field">
+        <label>Email de contacto</label>
+        <input type="email" id="v-email" placeholder="contacto@empresa.com">
+      </div>
+      <div class="field">
+        <label>Fecha de visita</label>
+        <input type="text" id="v-fecha-visita" placeholder="hoy">
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="v-screen-2">
+    <div class="step-label">👷 Paso 2</div>
+    <div class="screen-title">Puestos de trabajo</div>
+    <div class="screen-sub">Añade cada puesto que existe en la empresa.</div>
+    <div class="card">
+      <div id="v-puestos-list">
+        <div class="empty-state"><span class="empty-icon">👷</span>Aún no hay puestos. Añade el primero.</div>
+      </div>
+      <div class="divider"></div>
+      <div class="add-row">
+        <input type="text" id="v-puesto-input" placeholder="Nombre del puesto...">
+        <button class="add-btn" onclick="v_addPuesto()">+</button>
+      </div>
+      <div class="field-hint" style="margin-top:8px;">Ej: Cocinero, Camarero, Operario de máquina, Administrativo...</div>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label>¿Hay puestos con trabajo nocturno?</label>
+        <div class="yn-row">
+          <button class="yn-btn yes" id="v-nocturno-si" onclick="v_setYN('nocturno','si')">✅ Sí</button>
+          <button class="yn-btn no" id="v-nocturno-no" onclick="v_setYN('nocturno','no')">❌ No</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>¿Hay puestos con trabajo a turnos?</label>
+        <div class="yn-row">
+          <button class="yn-btn yes" id="v-turnos-si" onclick="v_setYN('turnos','si')">✅ Sí</button>
+          <button class="yn-btn no" id="v-turnos-no" onclick="v_setYN('turnos','no')">❌ No</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="v-screen-3">
+    <div class="step-label">🤰 Paso 3</div>
+    <div class="screen-title">Trabajadores sensibles</div>
+    <div class="screen-sub">Marca si hay alguno de estos colectivos.</div>
+    <div class="alert">⚠️ Recuerda: la identidad no se incluye por protección de datos. Solo el tipo y el puesto.</div>
+    <div class="card">
+      <div class="field">
+        <label>¿Hay trabajadoras embarazadas?</label>
+        <div class="yn-row">
+          <button class="yn-btn yes" id="v-embarazo-si" onclick="v_setYN('embarazo','si');v_toggleSensible('embarazo')">✅ Sí</button>
+          <button class="yn-btn no active" id="v-embarazo-no" onclick="v_setYN('embarazo','no');v_toggleSensible('embarazo')">❌ No</button>
+        </div>
+      </div>
+      <div id="v-embarazo-detail" style="display:none;" class="sensible-card">
+        <div class="sensible-title">🤰 Embarazo — ¿En qué puesto/s?</div>
+        <textarea id="v-embarazo-puestos" placeholder="Operario de máquina, Montaje..."></textarea>
+      </div>
+      <div class="divider"></div>
+      <div class="field">
+        <label>¿Hay trabajadoras en periodo de lactancia?</label>
+        <div class="yn-row">
+          <button class="yn-btn yes" id="v-lactancia-si" onclick="v_setYN('lactancia','si');v_toggleSensible('lactancia')">✅ Sí</button>
+          <button class="yn-btn no active" id="v-lactancia-no" onclick="v_setYN('lactancia','no');v_toggleSensible('lactancia')">❌ No</button>
+        </div>
+      </div>
+      <div id="v-lactancia-detail" style="display:none;" class="sensible-card">
+        <div class="sensible-title">🤱 Lactancia — ¿En qué puesto/s?</div>
+        <textarea id="v-lactancia-puestos" placeholder="Puesto/s afectado/s..."></textarea>
+      </div>
+      <div class="divider"></div>
+      <div class="field">
+        <label>¿Hay trabajadores menores de 18 años?</label>
+        <div class="yn-row">
+          <button class="yn-btn yes" id="v-menores-si" onclick="v_setYN('menores','si');v_toggleSensible('menores')">✅ Sí</button>
+          <button class="yn-btn no active" id="v-menores-no" onclick="v_setYN('menores','no');v_toggleSensible('menores')">❌ No</button>
+        </div>
+      </div>
+      <div id="v-menores-detail" style="display:none;" class="sensible-card">
+        <div class="sensible-title">👦 Menor — ¿En qué puesto/s?</div>
+        <textarea id="v-menores-puestos" placeholder="Puesto/s afectado/s..."></textarea>
+      </div>
+      <div class="divider"></div>
+      <div class="field">
+        <label>¿Hay trabajadores con discapacidad reconocida?</label>
+        <div class="yn-row">
+          <button class="yn-btn yes" id="v-discap-si" onclick="v_setYN('discap','si');v_toggleSensible('discap')">✅ Sí</button>
+          <button class="yn-btn no active" id="v-discap-no" onclick="v_setYN('discap','no');v_toggleSensible('discap')">❌ No</button>
+        </div>
+      </div>
+      <div id="v-discap-detail" style="display:none;" class="sensible-card">
+        <div class="sensible-title">♿ Discapacidad — ¿En qué puesto/s?</div>
+        <textarea id="v-discap-puestos" placeholder="Puesto/s afectado/s..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="v-screen-4">
+    <div class="step-label">⚙️ Paso 4</div>
+    <div class="screen-title">Equipos y maquinaria</div>
+    <div class="screen-sub">Añade los equipos que usan.</div>
+    <div class="card">
+      <div id="v-equipos-list">
+        <div class="empty-state"><span class="empty-icon">⚙️</span>Sin equipos anotados.</div>
+      </div>
+      <div class="divider"></div>
+      <div class="add-row">
+        <input type="text" id="v-equipo-input" placeholder="Nombre del equipo...">
+        <button class="add-btn" onclick="v_addEquipo()">+</button>
+      </div>
+      <div class="field-hint" style="margin-top:8px;">Ej: Freidora industrial, Atornillador eléctrico, Puente grúa...</div>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label>¿Hay vehículos de empresa?</label>
+        <div class="yn-row">
+          <button class="yn-btn yes" id="v-vehiculos-si" onclick="v_setYN('vehiculos','si');v_toggleVehiculos()">✅ Sí</button>
+          <button class="yn-btn no active" id="v-vehiculos-no" onclick="v_setYN('vehiculos','no');v_toggleVehiculos()">❌ No</button>
+        </div>
+      </div>
+      <div id="v-vehiculos-detail" style="display:none;">
+        <div class="divider"></div>
+        <div id="v-vehiculos-list"><div class="empty-state"><span class="empty-icon">🚗</span>Añade los vehículos</div></div>
+        <div class="add-row" style="margin-top:8px;">
+          <input type="text" id="v-vehiculo-input" placeholder="Tipo y matrícula...">
+          <button class="add-btn" onclick="v_addVehiculo()">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="v-screen-5">
+    <div class="step-label">🧪 Paso 5</div>
+    <div class="screen-title">Productos químicos</div>
+    <div class="screen-sub">¿Usan algún producto químico en su actividad?</div>
+    <div class="card">
+      <div class="field">
+        <label>¿Usan productos químicos?</label>
+        <div class="yn-row">
+          <button class="yn-btn yes" id="v-quimicos-si" onclick="v_setYN('quimicos','si');v_toggleQuimicos()">✅ Sí</button>
+          <button class="yn-btn no active" id="v-quimicos-no" onclick="v_setYN('quimicos','no');v_toggleQuimicos()">❌ No</button>
+        </div>
+      </div>
+      <div id="v-quimicos-detail" style="display:none;">
+        <div class="divider"></div>
+        <div id="v-quimicos-list"><div class="empty-state"><span class="empty-icon">🧪</span>Añade los productos</div></div>
+        <div class="add-row" style="margin-top:8px;">
+          <input type="text" id="v-quimico-input" placeholder="Nombre del producto...">
+          <button class="add-btn" onclick="v_addQuimico()">+</button>
+        </div>
+        <div class="divider"></div>
+        <div class="field">
+          <label>¿Disponen de fichas de seguridad (FDS)?</label>
+          <div class="yn-row">
+            <button class="yn-btn yes" id="v-fds-si" onclick="v_setYN('fds','si')">✅ Sí</button>
+            <button class="yn-btn no" id="v-fds-no" onclick="v_setYN('fds','no')">❌ No / No saben</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>¿Hay exposición a polvo, sílice u otros contaminantes?</label>
+          <div class="yn-row">
+            <button class="yn-btn yes" id="v-silice-si" onclick="v_setYN('silice','si')">✅ Sí</button>
+            <button class="yn-btn no" id="v-silice-no" onclick="v_setYN('silice','no')">❌ No</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="v-screen-6">
+    <div class="step-label">🏭 Paso 6</div>
+    <div class="screen-title">Instalaciones</div>
+    <div class="screen-sub">Marca las que existen en la empresa.</div>
+    <div class="card">
+      <div class="inst-grid" id="v-inst-grid">
+        <div class="inst-item" onclick="v_toggleInst(this,'extintores')"><span class="inst-icon">🧯</span><div class="inst-label">Extintores</div></div>
+        <div class="inst-item" onclick="v_toggleInst(this,'bies')"><span class="inst-icon">🚒</span><div class="inst-label">BIEs</div></div>
+        <div class="inst-item" onclick="v_toggleInst(this,'alarma')"><span class="inst-icon">🔔</span><div class="inst-label">Alarma incendio</div></div>
+        <div class="inst-item" onclick="v_toggleInst(this,'compresor')"><span class="inst-icon">💨</span><div class="inst-label">Compresor</div></div>
+        <div class="inst-item" onclick="v_toggleInst(this,'grua')"><span class="inst-icon">🏗️</span><div class="inst-label">Puente grúa</div></div>
+        <div class="inst-item" onclick="v_toggleInst(this,'camara')"><span class="inst-icon">❄️</span><div class="inst-label">Cámara frigorífica</div></div>
+        <div class="inst-item" onclick="v_toggleInst(this,'electrica')"><span class="inst-icon">⚡</span><div class="inst-label">Instalación eléctrica</div></div>
+        <div class="inst-item" onclick="v_toggleInst(this,'transformador')"><span class="inst-icon">🔌</span><div class="inst-label">Centro transformación</div></div>
+        <div class="inst-item" onclick="v_toggleInst(this,'climatizacion')"><span class="inst-icon">🌡️</span><div class="inst-label">Climatización</div></div>
+        <div class="inst-item" onclick="v_toggleInst(this,'atex')"><span class="inst-icon">💥</span><div class="inst-label">ATEX</div></div>
+        <div class="inst-item" onclick="v_toggleInst(this,'señalizacion')"><span class="inst-icon">🚪</span><div class="inst-label">Señalización</div></div>
+        <div class="inst-item" onclick="v_toggleInst(this,'carretilla')"><span class="inst-icon">🚜</span><div class="inst-label">Carretillas</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label>Descripción del local / instalaciones</label>
+        <textarea id="v-desc-local" placeholder="Superficie aprox., distribución, estado general..."></textarea>
+      </div>
+      <div class="field">
+        <label>Observaciones generales de la visita</label>
+        <textarea id="v-observaciones" placeholder="Todo lo que hayas visto y quieras recordar..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="v-screen-7">
+    <div class="step-label">✅ Resumen</div>
+    <div class="screen-title">Toma de datos completa</div>
+    <div class="screen-sub">Copia esto en el software cuando llegues a casa.</div>
+    <div class="copy-box">
+      <div class="copy-box-title">📋 Texto listo para copiar</div>
+      <div class="copy-text" id="v-resumen-texto"></div>
+    </div>
+    <button class="btn btn-secondary" style="margin-bottom:8px;" onclick="v_copyResumen()">📋 Copiar al portapapeles</button>
+    <button class="btn btn-primary" onclick="startNuevaVisita()">🔄 Nueva visita</button>
+  </div>
+
+  <div class="bottom-nav" id="v-bottom-nav">
+    <button class="btn-back" id="v-btn-back" onclick="v_goBack()" style="display:none;">←</button>
+    <button class="btn-next" id="v-btn-next" onclick="v_goNext()">Siguiente →</button>
+  </div>
+</div>
+
+<!-- ============ MODULE: COMUNICACIONES ============ -->
+<div class="module" id="module-comunicaciones">
+  <div class="screen active">
+    <div class="screen-title">Nuevo mensaje</div>
+    <div class="screen-sub">Elige empresa, tipo y canal. La IA lo redacta por ti.</div>
+
+    <div class="card">
+      <div class="field">
+        <label>Empresa</label>
+        <div class="empresa-search">
+          <input type="text" id="c-empresa-search-input" placeholder="Buscar empresa..." oninput="c_filterEmpresas()" onfocus="c_filterEmpresas()">
+          <div class="empresa-list" id="c-empresa-dropdown" style="display:none;"></div>
+          <div class="empresa-selected" id="c-empresa-selected-box" style="display:none;">
+            <div>
+              <div class="empresa-selected-name" id="c-sel-nombre"></div>
+              <div class="empresa-selected-sub" id="c-sel-contacto"></div>
+            </div>
+            <button class="empresa-clear" onclick="c_clearEmpresa()">×</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>Tipo de mensaje</label>
+        <div class="tipo-grid">
+          <div class="tipo-btn" onclick="c_selectTipo(this,'recordatorio')"><span class="tipo-icon">📅</span><span class="tipo-label">Recordatorio de cita</span></div>
+          <div class="tipo-btn" onclick="c_selectTipo(this,'documentacion')"><span class="tipo-icon">📋</span><span class="tipo-label">Solicitud documentación</span></div>
+          <div class="tipo-btn" onclick="c_selectTipo(this,'confirmacion')"><span class="tipo-icon">✅</span><span class="tipo-label">Confirmación tras visita</span></div>
+          <div class="tipo-btn" onclick="c_selectTipo(this,'vencimiento')"><span class="tipo-icon">⏰</span><span class="tipo-label">Aviso vencimiento</span></div>
+          <div class="tipo-btn" onclick="c_selectTipo(this,'agendar')"><span class="tipo-icon">🗓️</span><span class="tipo-label">Proponer fecha</span></div>
+          <div class="tipo-btn" onclick="c_selectTipo(this,'formacion')"><span class="tipo-icon">🎓</span><span class="tipo-label">Recordatorio formación</span></div>
+          <div class="tipo-btn" onclick="c_selectTipo(this,'seguimiento')"><span class="tipo-icon">🔍</span><span class="tipo-label">Seguimiento medidas</span></div>
+          <div class="tipo-btn" onclick="c_selectTipo(this,'libre')"><span class="tipo-icon">✏️</span><span class="tipo-label">Mensaje libre</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>Canal</label>
+        <div class="canal-row">
+          <button class="canal-btn active-email" id="c-canal-email" onclick="c_selectCanal('email')">📧 Email</button>
+          <button class="canal-btn" id="c-canal-wa" onclick="c_selectCanal('whatsapp')">💬 WhatsApp</button>
+        </div>
+      </div>
+      <div class="field" id="c-libre-field" style="display:none;">
+        <label>¿Qué quieres decirle?</label>
+        <textarea id="c-libre-texto" placeholder="Describe lo que necesitas comunicar..."></textarea>
+      </div>
+      <div class="field">
+        <label>Detalles adicionales (opcional)</label>
+        <textarea id="c-contexto-extra" placeholder="Fecha concreta, documento específico, motivo..." style="min-height:60px;"></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="c-btn-generar" onclick="c_generarMensaje()">✨ Generar mensaje</button>
+
+    <div class="generating-box" id="c-gen-box" style="margin-top:16px;">
+      <div class="gen-spinner"></div>
+      <div class="gen-text">Redactando el mensaje...</div>
+    </div>
+
+    <div class="result-box" id="c-result-box" style="margin-top:16px;">
+      <div class="result-title">Mensaje generado</div>
+      <div class="result-content" id="c-result-content"></div>
+      <div class="result-actions">
+        <button class="btn btn-secondary btn-sm" onclick="c_copyResult()">📋 Copiar</button>
+        <button class="btn btn-secondary btn-sm" id="c-btn-open-email" onclick="c_openInMail()" style="display:none;">📧 Abrir en Mail</button>
+        <button class="btn btn-wa btn-sm" id="c-btn-open-wa" onclick="c_openInWhatsApp()" style="display:none;">💬 Abrir en WhatsApp</button>
+      </div>
+      <div class="ajuste-chips">
+        <button class="ajuste-chip" onclick="c_ajustar('formal')">Más formal</button>
+        <button class="ajuste-chip" onclick="c_ajustar('breve')">Más breve</button>
+        <button class="ajuste-chip" onclick="c_ajustar('amable')">Más amable</button>
+        <button class="ajuste-chip" onclick="c_ajustar('firme')">Más firme</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODULE: EMPRESAS ============ -->
+<div class="module" id="module-empresas">
+  <div class="screen active">
+    <div class="screen-title">Tus empresas</div>
+    <div class="screen-sub">Guarda los datos una vez y ya no los escribes más.</div>
+    <div class="empresas-toolbar">
+      <input type="text" id="e-empresas-search" placeholder="Buscar..." oninput="e_renderEmpresasList()">
+      <button class="add-empresa-btn" onclick="e_openNewEmpresa()">+</button>
+    </div>
+    <div id="e-empresas-list"></div>
+  </div>
+</div>
+
+<!-- ============ BOTTOM MAIN NAV ============ -->
+<div class="main-nav">
+  <button class="main-nav-item active" onclick="goToModule('home')" id="nav-home"><span class="main-nav-icon">🏠</span><span class="main-nav-label">Inicio</span></button>
+  <button class="main-nav-item" onclick="goToModule('visita')" id="nav-visita"><span class="main-nav-icon">📋</span><span class="main-nav-label">Visita</span></button>
+  <button class="main-nav-item" onclick="goToModule('comunicaciones')" id="nav-comunicaciones"><span class="main-nav-icon">✉️</span><span class="main-nav-label">Mensajes</span></button>
+  <button class="main-nav-item" onclick="goToModule('empresas')" id="nav-empresas"><span class="main-nav-icon">🏢</span><span class="main-nav-label">Empresas</span></button>
+</div>
+
+<!-- ============ MODALS ============ -->
+<div class="modal-overlay" id="modal-apikey">
+  <div class="modal">
+    <div class="modal-title">🔑 API Key de Anthropic</div>
+    <div class="field">
+      <label>Tu clave</label>
+      <input type="text" id="apikey-input" placeholder="sk-ant-api03-...">
+    </div>
+    <div style="font-size:12px;color:var(--gray-400);margin-bottom:16px;line-height:1.5;">
+      Consíguela en console.anthropic.com → API Keys. Se usa en toda la app.
+    </div>
+    <button class="btn btn-primary" onclick="saveApiKey()">Guardar</button>
+    <button class="btn btn-secondary" style="margin-top:8px;" onclick="closeModal('apikey')">Cerrar</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-empresa">
+  <div class="modal">
+    <div class="modal-title" id="modal-empresa-title">🏢 Añadir empresa</div>
+    <input type="hidden" id="edit-emp-id">
+    <div class="field"><label>Nombre *</label><input type="text" id="new-emp-nombre" placeholder="Restaurante El Pino S.L."></div>
+    <div class="field"><label>CIF</label><input type="text" id="new-emp-cif" placeholder="B12345678"></div>
+    <div class="field"><label>Persona de contacto</label><input type="text" id="new-emp-contacto" placeholder="Ion del Río"></div>
+    <div class="field"><label>Email</label><input type="email" id="new-emp-email" placeholder="contacto@empresa.com"></div>
+    <div class="field"><label>Teléfono / WhatsApp</label><input type="tel" id="new-emp-telefono" placeholder="617645563"></div>
+    <div class="field"><label>Sector</label><input type="text" id="new-emp-sector" placeholder="Hostelería"></div>
+    <button class="btn btn-primary" onclick="e_saveEmpresaModal()">Guardar empresa</button>
+    <button class="btn btn-secondary" style="margin-top:8px;" onclick="closeModal('empresa')">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================================================================
+// ===== SHARED CORE: empresas, API key, navigation, modals =====
+// ==================================================================
+let apiKey = localStorage.getItem('prl_apikey') || '';
+let empresas = JSON.parse(localStorage.getItem('prl_empresas') || '[]');
+let visitas = JSON.parse(localStorage.getItem('prl_visitas') || '[]');
+let currentModule = 'home';
+
+function goToModule(mod) {
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.main-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('module-' + mod).classList.add('active');
+  document.getElementById('nav-' + mod).classList.add('active');
+  currentModule = mod;
+
+  const titles = { home: '🛡️ PRL App', visita: '📋 Visita', comunicaciones: '✉️ Comunicaciones', empresas: '🏢 Empresas' };
+  document.getElementById('app-header-title').textContent = titles[mod];
+  document.getElementById('progress-wrap').style.display = mod === 'visita' ? 'block' : 'none';
+  document.getElementById('v-bottom-nav').style.display = 'none';
+
+  if (mod === 'home') updateHomeDashboard();
+  if (mod === 'visita') { v_showHistorial(); }
+  if (mod === 'comunicaciones') { c_refreshEmpresaOptions(); }
+  if (mod === 'empresas') { e_renderEmpresasList(); }
+
+  window.scrollTo(0,0);
+}
+
+function openModal(name) {
+  document.getElementById('modal-' + name).classList.add('open');
+  if (name === 'apikey') document.getElementById('apikey-input').value = apiKey;
+}
+function closeModal(name) {
+  document.getElementById('modal-' + name).classList.remove('open');
+}
+function saveApiKey() {
+  const key = document.getElementById('apikey-input').value.trim();
+  if (!key.startsWith('sk-ant')) { showToast('⚠️ La clave debe empezar por sk-ant-'); return; }
+  apiKey = key;
+  localStorage.setItem('prl_apikey', key);
+  closeModal('apikey');
+  showToast('✅ API Key guardada');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+async function callClaude(prompt) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: 'claude-sonnet-5', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content.map(b => b.text || '').join('');
+}
+
+// ===== EMPRESAS (shared database) =====
+function saveEmpresasDB() { localStorage.setItem('prl_empresas', JSON.stringify(empresas)); }
+
+function upsertEmpresaFromVisita(vdata) {
+  // Try to find existing empresa by name (case-insensitive)
+  let existing = empresas.find(e => e.nombre.toLowerCase().trim() === vdata.nombre.toLowerCase().trim());
+  if (existing) {
+    existing.cif = vdata.cif || existing.cif;
+    existing.contacto = vdata.contacto || existing.contacto;
+    existing.email = vdata.email || existing.email;
+    existing.telefono = vdata.telefono || existing.telefono;
+    existing.sector = vdata.sector || existing.sector;
+    existing.direccion = vdata.direccion || existing.direccion;
+  } else {
+    empresas.push({
+      id: Date.now(),
+      nombre: vdata.nombre, cif: vdata.cif, contacto: vdata.contacto,
+      email: vdata.email, telefono: vdata.telefono, sector: vdata.sector,
+      direccion: vdata.direccion
+    });
+  }
+  saveEmpresasDB();
+}
+
+// ===== HOME DASHBOARD =====
+function updateHomeDashboard() {
+  document.getElementById('dash-empresas').textContent = empresas.length;
+  document.getElementById('dash-visitas').textContent = visitas.length;
+  const list = document.getElementById('home-visitas-list');
+  if (visitas.length === 0) {
+    list.innerHTML = '<div class="empty-state" style="padding:10px;"><span class="empty-icon">📋</span>Aún no hay visitas registradas</div>';
+  } else {
+    list.innerHTML = visitas.slice(0,3).map(v => `
+      <div class="list-item">
+        <div style="flex:1"><div class="list-item-text">🏢 ${v.nombre}</div><div style="font-size:11px;color:var(--gray-400);">${v.fecha}</div></div>
+      </div>`).join('');
+  }
+}
+
+// ==================================================================
+// ===== MODULE: VISITA =====
+// ==================================================================
+let vCurrentStep = 1;
+const vTotalSteps = 7;
+let vData = {};
+
+function v_resetData() {
+  vData = {
+    nombre:'', cif:'', direccion:'', trabajadores:'', sector:'', actividad:'', telefono:'', contacto:'', email:'', fechaVisita:'',
+    puestos: [], nocturno:'', turnos:'',
+    embarazo:'no', embarazoPuestos:'', lactancia:'no', lactanciaPuestos:'',
+    menores:'no', menoresPuestos:'', discap:'no', discapPuestos:'',
+    equipos: [], vehiculos:'no', vehiculosList: [],
+    quimicos:'no', quimicosList: [], fds:'', silice:'',
+    instalaciones: [], descLocal:'', observaciones:''
+  };
+}
+v_resetData();
+
+function v_showHistorial() {
+  document.querySelectorAll('#module-visita .screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('v-screen-historial').classList.add('active');
+  document.getElementById('v-bottom-nav').style.display = 'none';
+  document.getElementById('progress-wrap').style.display = 'none';
+
+  const list = document.getElementById('v-historial-list');
+  if (visitas.length === 0) {
+    list.innerHTML = '<div class="card"><div class="empty-state"><span class="empty-icon">📋</span>Aún no has guardado ninguna visita.</div></div>';
+  } else {
+    list.innerHTML = visitas.map(v => `
+      <div class="empresa-card" onclick="v_verVisitaGuardada(${v.id})">
+        <div class="empresa-avatar">${v.nombre.slice(0,2).toUpperCase()}</div>
+        <div class="empresa-card-info">
+          <div class="empresa-card-name">${v.nombre}</div>
+          <div class="empresa-card-contact">${v.fecha}</div>
+        </div>
+        <button class="empresa-card-del" onclick="event.stopPropagation();v_delVisita(${v.id})">×</button>
+      </div>`).join('');
+  }
+}
+
+function startNuevaVisita() {
+  v_resetData();
+  vCurrentStep = 1;
+  document.querySelectorAll('#module-visita .screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('v-screen-1').classList.add('active');
+  document.getElementById('v-bottom-nav').style.display = 'flex';
+  document.getElementById('progress-wrap').style.display = 'block';
+
+  // clear form fields
+  ['v-nombre','v-cif','v-direccion','v-trabajadores','v-actividad','v-telefono','v-contacto','v-email','v-fecha-visita','v-puesto-input','v-equipo-input','v-vehiculo-input','v-quimico-input','v-desc-local','v-observaciones','v-embarazo-puestos','v-lactancia-puestos','v-menores-puestos','v-discap-puestos'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('v-sector').selectedIndex = 0;
+  document.getElementById('v-empresa-existente').selectedIndex = 0;
+  document.querySelectorAll('#module-visita .yn-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#module-visita .inst-item').forEach(b => b.classList.remove('active'));
+  ['v-embarazo-detail','v-lactancia-detail','v-menores-detail','v-discap-detail','v-vehiculos-detail','v-quimicos-detail'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.querySelectorAll('#module-visita .yn-btn.no').forEach(b => {
+    if (['v-embarazo-no','v-lactancia-no','v-menores-no','v-discap-no','v-vehiculos-no','v-quimicos-no'].includes(b.id)) b.classList.add('active');
+  });
+  v_renderPuestos(); v_renderEquipos(); v_renderVehiculos(); v_renderQuimicos();
+  v_refreshEmpresaSelect();
+  v_updateHeader();
+}
+
+function v_refreshEmpresaSelect() {
+  const sel = document.getElementById('v-empresa-existente');
+  sel.innerHTML = '<option value="">— Nueva empresa —</option>' +
+    empresas.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
+}
+
+function v_prefillEmpresa() {
+  const id = document.getElementById('v-empresa-existente').value;
+  if (!id) return;
+  const e = empresas.find(x => x.id == id);
+  if (!e) return;
+  document.getElementById('v-nombre').value = e.nombre || '';
+  document.getElementById('v-cif').value = e.cif || '';
+  document.getElementById('v-direccion').value = e.direccion || '';
+  document.getElementById('v-sector').value = e.sector || '';
+  document.getElementById('v-telefono').value = e.telefono || '';
+  document.getElementById('v-contacto').value = e.contacto || '';
+  document.getElementById('v-email').value = e.email || '';
+  showToast('✅ Datos de la empresa cargados');
+}
+
+function v_updateHeader() {
+  document.getElementById('header-step').textContent = `Paso ${vCurrentStep} de ${vTotalSteps}`;
+  document.getElementById('progress-fill').style.width = (vCurrentStep / vTotalSteps * 100) + '%';
+  document.getElementById('v-btn-back').style.display = vCurrentStep > 1 ? 'block' : 'none';
+  const btnNext = document.getElementById('v-btn-next');
+  if (vCurrentStep === vTotalSteps) { btnNext.style.display = 'none'; document.getElementById('v-bottom-nav').style.display = 'none'; }
+  else { document.getElementById('v-bottom-nav').style.display = 'flex'; btnNext.textContent = vCurrentStep === vTotalSteps - 1 ? 'Ver resumen ✅' : 'Siguiente →'; btnNext.style.display = 'block'; }
+}
+
+function v_goNext() {
+  if (vCurrentStep === 1) {
+    if (!document.getElementById('v-nombre').value.trim()) { showToast('⚠️ Escribe el nombre de la empresa'); return; }
+    if (!document.getElementById('v-trabajadores').value) { showToast('⚠️ Indica el nº de trabajadores'); return; }
+    v_collect1();
+  }
+  if (vCurrentStep === 3) v_collect3();
+  if (vCurrentStep === 6) { v_collect6(); v_buildResumen(); }
+
+  document.getElementById('v-screen-' + vCurrentStep).classList.remove('active');
+  vCurrentStep++;
+  document.getElementById('v-screen-' + vCurrentStep).classList.add('active');
+  v_updateHeader();
+  window.scrollTo(0,0);
+}
+function v_goBack() {
+  document.getElementById('v-screen-' + vCurrentStep).classList.remove('active');
+  vCurrentStep--;
+  document.getElementById('v-screen-' + vCurrentStep).classList.add('active');
+  v_updateHeader();
+  window.scrollTo(0,0);
+}
+
+function v_collect1() {
+  vData.nombre = document.getElementById('v-nombre').value.trim();
+  vData.cif = document.getElementById('v-cif').value.trim();
+  vData.direccion = document.getElementById('v-direccion').value.trim();
+  vData.trabajadores = document.getElementById('v-trabajadores').value;
+  vData.sector = document.getElementById('v-sector').value;
+  vData.actividad = document.getElementById('v-actividad').value.trim();
+  vData.telefono = document.getElementById('v-telefono').value.trim();
+  vData.contacto = document.getElementById('v-contacto').value.trim();
+  vData.email = document.getElementById('v-email').value.trim();
+  vData.fechaVisita = document.getElementById('v-fecha-visita').value.trim() || new Date().toLocaleDateString('es-ES');
+}
+function v_collect3() {
+  vData.embarazoPuestos = document.getElementById('v-embarazo-puestos').value;
+  vData.lactanciaPuestos = document.getElementById('v-lactancia-puestos').value;
+  vData.menoresPuestos = document.getElementById('v-menores-puestos').value;
+  vData.discapPuestos = document.getElementById('v-discap-puestos').value;
+}
+function v_collect6() {
+  vData.descLocal = document.getElementById('v-desc-local').value;
+  vData.observaciones = document.getElementById('v-observaciones').value;
+}
+
+// Puestos
+function v_addPuesto() {
+  const inp = document.getElementById('v-puesto-input');
+  const val = inp.value.trim(); if (!val) return;
+  vData.puestos.push(val); inp.value = ''; v_renderPuestos();
+}
+function v_renderPuestos() {
+  const list = document.getElementById('v-puestos-list');
+  list.innerHTML = vData.puestos.length === 0
+    ? '<div class="empty-state"><span class="empty-icon">👷</span>Aún no hay puestos.</div>'
+    : vData.puestos.map((p,i) => `<div class="list-item"><div class="list-item-text">👷 ${p}</div><button class="del-btn" onclick="v_delPuesto(${i})">×</button></div>`).join('');
+}
+function v_delPuesto(i) { vData.puestos.splice(i,1); v_renderPuestos(); }
+
+// Equipos
+function v_addEquipo() {
+  const inp = document.getElementById('v-equipo-input');
+  const val = inp.value.trim(); if (!val) return;
+  vData.equipos.push(val); inp.value = ''; v_renderEquipos();
+}
+function v_renderEquipos() {
+  const list = document.getElementById('v-equipos-list');
+  list.innerHTML = vData.equipos.length === 0
+    ? '<div class="empty-state"><span class="empty-icon">⚙️</span>Sin equipos anotados.</div>'
+    : vData.equipos.map((e,i) => `<div class="list-item"><div class="list-item-text">⚙️ ${e}</div><button class="del-btn" onclick="v_delEquipo(${i})">×</button></div>`).join('');
+}
+function v_delEquipo(i) { vData.equipos.splice(i,1); v_renderEquipos(); }
+
+// Vehiculos
+function v_addVehiculo() {
+  const inp = document.getElementById('v-vehiculo-input');
+  const val = inp.value.trim(); if (!val) return;
+  vData.vehiculosList.push(val); inp.value = ''; v_renderVehiculos();
+}
+function v_renderVehiculos() {
+  const list = document.getElementById('v-vehiculos-list');
+  list.innerHTML = vData.vehiculosList.length === 0
+    ? '<div class="empty-state"><span class="empty-icon">🚗</span>Añade los vehículos</div>'
+    : vData.vehiculosList.map((v,i) => `<div class="list-item"><div class="list-item-text">🚗 ${v}</div><button class="del-btn" onclick="v_delVehiculo(${i})">×</button></div>`).join('');
+}
+function v_delVehiculo(i) { vData.vehiculosList.splice(i,1); v_renderVehiculos(); }
+function v_toggleVehiculos() { document.getElementById('v-vehiculos-detail').style.display = vData.vehiculos === 'si' ? 'block' : 'none'; }
+
+// Quimicos
+function v_addQuimico() {
+  const inp = document.getElementById('v-quimico-input');
+  const val = inp.value.trim(); if (!val) return;
+  vData.quimicosList.push(val); inp.value = ''; v_renderQuimicos();
+}
+function v_renderQuimicos() {
+  const list = document.getElementById('v-quimicos-list');
+  list.innerHTML = vData.quimicosList.length === 0
+    ? '<div class="empty-state"><span class="empty-icon">🧪</span>Añade los productos</div>'
+    : vData.quimicosList.map((q,i) => `<div class="list-item"><div class="list-item-text">🧪 ${q}</div><button class="del-btn" onclick="v_delQuimico(${i})">×</button></div>`).join('');
+}
+function v_delQuimico(i) { vData.quimicosList.splice(i,1); v_renderQuimicos(); }
+function v_toggleQuimicos() { document.getElementById('v-quimicos-detail').style.display = vData.quimicos === 'si' ? 'block' : 'none'; }
+
+// Sensibles
+function v_toggleSensible(tipo) { document.getElementById('v-'+tipo+'-detail').style.display = vData[tipo] === 'si' ? 'block' : 'none'; }
+
+// YN generic
+function v_setYN(field, val) {
+  vData[field] = val;
+  const si = document.getElementById('v-'+field+'-si'), no = document.getElementById('v-'+field+'-no');
+  if (si) si.classList.toggle('active', val==='si');
+  if (no) no.classList.toggle('active', val==='no');
+}
+
+// Instalaciones
+const instLabels = { extintores:'Extintores', bies:'BIEs', alarma:'Detección/Alarma incendio', compresor:'Compresor/Aparatos a presión', grua:'Puente grúa/Aparatos elevadores', camara:'Cámara frigorífica', electrica:'Instalación eléctrica BT', transformador:'Centro de transformación', climatizacion:'Climatización/ACS', atex:'ATEX', señalizacion:'Señalización luminiscente', carretilla:'Carretillas elevadoras' };
+function v_toggleInst(el, key) {
+  el.classList.toggle('active');
+  if (el.classList.contains('active')) { if (!vData.instalaciones.includes(key)) vData.instalaciones.push(key); }
+  else { vData.instalaciones = vData.instalaciones.filter(i => i !== key); }
+}
+
+// Resumen
+function v_buildResumen() {
+  const yn = v => v === 'si' ? 'Sí' : v === 'no' ? 'No' : '—';
+  const d = vData;
+  let txt = `════════════════════════════════
+TOMA DE DATOS PRL — ${d.fechaVisita || new Date().toLocaleDateString('es-ES')}
+════════════════════════════════
+
+▶ D.GEN (Datos generales)
+Nombre: ${d.nombre}
+CIF: ${d.cif || '—'}
+Dirección centro trabajo: ${d.direccion || '—'}
+Actividad/CNAE: ${d.actividad || '—'}
+Nº trabajadores: ${d.trabajadores}
+Sector: ${d.sector || '—'}
+Teléfono: ${d.telefono || '—'}
+Persona de contacto: ${d.contacto || '—'}
+Email: ${d.email || '—'}
+
+▶ PUESTOS
+${d.puestos.length > 0 ? d.puestos.map(p => '• '+p).join('\n') : '— Sin anotar'}
+Trabajo nocturno: ${yn(d.nocturno)}
+Trabajo a turnos: ${yn(d.turnos)}
+
+▶ TRB. SEN. (Trabajadores sensibles)
+Embarazadas: ${yn(d.embarazo)}${d.embarazo==='si' ? ' — Puestos: '+d.embarazoPuestos : ''}
+Lactancia: ${yn(d.lactancia)}${d.lactancia==='si' ? ' — Puestos: '+d.lactanciaPuestos : ''}
+Menores de 18: ${yn(d.menores)}${d.menores==='si' ? ' — Puestos: '+d.menoresPuestos : ''}
+Discapacidad: ${yn(d.discap)}${d.discap==='si' ? ' — Puestos: '+d.discapPuestos : ''}
+
+▶ MÁQUINAS
+${d.equipos.length > 0 ? d.equipos.map(e => '• '+e).join('\n') : '— Sin anotar'}
+
+▶ VEHÍCULOS
+${d.vehiculos==='no' ? 'No tienen vehículos' : d.vehiculosList.length > 0 ? d.vehiculosList.map(v=>'• '+v).join('\n') : '— Sin especificar'}
+
+▶ PRD. QUIM.
+${d.quimicos==='no' ? 'No usan productos químicos' : d.quimicosList.length > 0 ? d.quimicosList.map(q=>'• '+q).join('\n') : '— Sin especificar'}${d.quimicos==='si' ? '\nFichas de seguridad (FDS): '+yn(d.fds)+'\nExposición a sílice/polvo: '+yn(d.silice) : ''}
+
+▶ INSTALACIONES GENERALES
+${d.instalaciones.length > 0 ? d.instalaciones.map(i=>'• '+instLabels[i]).join('\n') : '— Ninguna marcada'}
+
+▶ DESCRIPCIÓN DEL LOCAL
+${d.descLocal || '— Sin anotar'}
+
+▶ OBSERVACIONES DE LA VISITA
+${d.observaciones || '— Sin observaciones'}
+
+════════════════════════════════`;
+
+  document.getElementById('v-resumen-texto').textContent = txt;
+  v_guardarVisita(txt);
+  upsertEmpresaFromVisita(vData);
+}
+
+function v_guardarVisita(resumenTxt) {
+  visitas.unshift({ id: Date.now(), nombre: vData.nombre || 'Sin nombre', fecha: vData.fechaVisita || new Date().toLocaleDateString('es-ES'), resumen: resumenTxt });
+  localStorage.setItem('prl_visitas', JSON.stringify(visitas));
+}
+function v_copyResumen() {
+  navigator.clipboard.writeText(document.getElementById('v-resumen-texto').textContent).then(() => showToast('✅ Copiado al portapapeles'));
+}
+function v_verVisitaGuardada(id) {
+  const v = visitas.find(x => x.id === id); if (!v) return;
+  document.getElementById('v-resumen-texto').textContent = v.resumen;
+  document.querySelectorAll('#module-visita .screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('v-screen-7').classList.add('active');
+  document.getElementById('v-bottom-nav').style.display = 'none';
+  document.getElementById('progress-wrap').style.display = 'none';
+  vCurrentStep = 7;
+}
+function v_delVisita(id) {
+  if (!confirm('¿Eliminar esta visita guardada?')) return;
+  visitas = visitas.filter(x => x.id !== id);
+  localStorage.setItem('prl_visitas', JSON.stringify(visitas));
+  v_showHistorial();
+}
+
+// ==================================================================
+// ===== MODULE: COMUNICACIONES =====
+// ==================================================================
+let cSelectedEmpresa = null;
+let cTipoMensaje = '';
+let cCanalActual = 'email';
+let cLastGenerated = '';
+
+function c_refreshEmpresaOptions() { /* dropdown built live via filter */ }
+
+function c_filterEmpresas() {
+  const val = document.getElementById('c-empresa-search-input').value.toLowerCase();
+  const dropdown = document.getElementById('c-empresa-dropdown');
+  if (!val) { dropdown.style.display = 'none'; return; }
+  const filtered = empresas.filter(e => e.nombre.toLowerCase().includes(val));
+  dropdown.innerHTML = filtered.length === 0
+    ? `<div class="empresa-item" style="color:var(--gray-400);">Sin resultados. Añádela en la pestaña Empresas.</div>`
+    : filtered.map(e => `<div class="empresa-item" onclick="c_pickEmpresa(${e.id})"><div class="empresa-item-name">${e.nombre}</div><div class="empresa-item-sub">${e.sector || 'Sin sector'} ${e.contacto ? '· ' + e.contacto : ''}</div></div>`).join('');
+  dropdown.style.display = 'block';
+}
+function c_pickEmpresa(id) {
+  cSelectedEmpresa = empresas.find(e => e.id === id);
+  document.getElementById('c-empresa-dropdown').style.display = 'none';
+  document.getElementById('c-empresa-search-input').style.display = 'none';
+  const box = document.getElementById('c-empresa-selected-box');
+  box.style.display = 'flex';
+  document.getElementById('c-sel-nombre').textContent = cSelectedEmpresa.nombre;
+  document.getElementById('c-sel-contacto').textContent = [cSelectedEmpresa.contacto, cSelectedEmpresa.telefono, cSelectedEmpresa.email].filter(Boolean).join(' · ') || 'Sin datos de contacto';
+}
+function c_clearEmpresa() {
+  cSelectedEmpresa = null;
+  document.getElementById('c-empresa-selected-box').style.display = 'none';
+  document.getElementById('c-empresa-search-input').style.display = 'block';
+  document.getElementById('c-empresa-search-input').value = '';
+}
+function c_selectTipo(btn, tipo) {
+  document.querySelectorAll('#module-comunicaciones .tipo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  cTipoMensaje = tipo;
+  document.getElementById('c-libre-field').style.display = tipo === 'libre' ? 'block' : 'none';
+}
+function c_selectCanal(canal) {
+  cCanalActual = canal;
+  document.getElementById('c-canal-email').classList.toggle('active-email', canal === 'email');
+  document.getElementById('c-canal-wa').classList.toggle('active-wa', canal === 'whatsapp');
+}
+
+async function c_generarMensaje() {
+  if (!apiKey) { openModal('apikey'); return; }
+  if (!cSelectedEmpresa) { showToast('⚠️ Selecciona una empresa'); return; }
+  if (!cTipoMensaje) { showToast('⚠️ Elige el tipo de mensaje'); return; }
+  if (cTipoMensaje === 'libre' && !document.getElementById('c-libre-texto').value.trim()) { showToast('⚠️ Describe qué quieres decir'); return; }
+
+  const contexto = document.getElementById('c-contexto-extra').value.trim();
+  const libreTexto = document.getElementById('c-libre-texto').value.trim();
+  const tipoDescripciones = {
+    recordatorio: 'un recordatorio de una cita/visita programada próximamente',
+    documentacion: 'una solicitud de documentación pendiente que el cliente debe enviar',
+    confirmacion: 'una confirmación y agradecimiento tras haber realizado la visita técnica',
+    vencimiento: 'un aviso de que algo está próximo a vencer o ya venció (evaluación de riesgos, formación obligatoria, revisión) y hay que actuar',
+    agendar: 'una propuesta para agendar una nueva cita o visita, pidiendo al cliente que confirme disponibilidad',
+    formacion: 'un recordatorio de una formación en PRL pendiente o próxima',
+    seguimiento: 'un seguimiento sobre el estado de medidas preventivas acordadas previamente',
+    libre: libreTexto
+  };
+  const canalTexto = cCanalActual === 'whatsapp'
+    ? 'Formato WhatsApp: breve, directo, máximo 5-6 líneas, tono cercano pero profesional. Sin asunto.'
+    : 'Formato Email: profesional y claro, con asunto al principio (línea "Asunto: ..."), saludo, cuerpo estructurado y despedida.';
+
+  const prompt = `Eres un técnico de Prevención de Riesgos Laborales escribiendo a un cliente.
+Empresa destinataria: ${cSelectedEmpresa.nombre}
+Persona de contacto: ${cSelectedEmpresa.contacto || 'el responsable de la empresa'}
+Sector: ${cSelectedEmpresa.sector || 'no especificado'}
+Objetivo del mensaje: ${tipoDescripciones[cTipoMensaje]}
+${contexto ? 'Detalles adicionales: ' + contexto : ''}
+${canalTexto}
+Escribe el mensaje completo y listo para enviar, en español de España, tono profesional pero cercano. No uses placeholders entre corchetes.`;
+
+  document.getElementById('c-result-box').classList.remove('visible');
+  document.getElementById('c-gen-box').classList.add('visible');
+  document.getElementById('c-btn-generar').disabled = true;
+  try {
+    const text = await callClaude(prompt);
+    cLastGenerated = text;
+    document.getElementById('c-result-content').textContent = text;
+    document.getElementById('c-gen-box').classList.remove('visible');
+    document.getElementById('c-result-box').classList.add('visible');
+    document.getElementById('c-btn-open-email').style.display = cCanalActual === 'email' ? 'block' : 'none';
+    document.getElementById('c-btn-open-wa').style.display = cCanalActual === 'whatsapp' ? 'block' : 'none';
+  } catch(err) {
+    document.getElementById('c-gen-box').classList.remove('visible');
+    showToast('❌ Error: ' + err.message);
+  } finally {
+    document.getElementById('c-btn-generar').disabled = false;
+  }
+}
+async function c_ajustar(tipo) {
+  if (!cLastGenerated) return;
+  const ajustes = { formal: 'Reescribe con un tono más formal y corporativo:', breve: 'Reescribe mucho más breve y directo, la mitad de palabras:', amable: 'Reescribe con un tono más cálido y amable:', firme: 'Reescribe con un tono más firme, dejando claro que requiere acción:' };
+  document.getElementById('c-gen-box').classList.add('visible');
+  document.getElementById('c-result-box').classList.remove('visible');
+  try {
+    const text = await callClaude(ajustes[tipo] + '\n\n' + cLastGenerated);
+    cLastGenerated = text;
+    document.getElementById('c-result-content').textContent = text;
+  } catch(err) { showToast('❌ Error: ' + err.message); }
+  finally { document.getElementById('c-gen-box').classList.remove('visible'); document.getElementById('c-result-box').classList.add('visible'); }
+}
+function c_copyResult() { navigator.clipboard.writeText(cLastGenerated).then(() => showToast('✅ Copiado')); }
+function c_openInMail() {
+  const lines = cLastGenerated.split('\n');
+  let asunto = 'Comunicación PRL', body = cLastGenerated;
+  if (lines[0].toLowerCase().startsWith('asunto:')) { asunto = lines[0].replace(/asunto:/i,'').trim(); body = lines.slice(1).join('\n').trim(); }
+  window.location.href = `mailto:${cSelectedEmpresa?.email || ''}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(body)}`;
+}
+function c_openInWhatsApp() {
+  const tel = (cSelectedEmpresa?.telefono || '').replace(/\D/g,'');
+  window.open(`https://wa.me/${tel}?text=${encodeURIComponent(cLastGenerated)}`, '_blank');
+}
+document.addEventListener('click', (e) => { if (!e.target.closest('.empresa-search')) { const d = document.getElementById('c-empresa-dropdown'); if (d) d.style.display = 'none'; } });
+
+// ==================================================================
+// ===== MODULE: EMPRESAS (CRM) =====
+// ==================================================================
+function e_openNewEmpresa() {
+  document.getElementById('modal-empresa-title').textContent = '🏢 Añadir empresa';
+  document.getElementById('edit-emp-id').value = '';
+  ['new-emp-nombre','new-emp-cif','new-emp-contacto','new-emp-email','new-emp-telefono','new-emp-sector'].forEach(id => document.getElementById(id).value = '');
+  openModal('empresa');
+}
+function e_openEditEmpresa(id) {
+  const e = empresas.find(x => x.id === id); if (!e) return;
+  document.getElementById('modal-empresa-title').textContent = '🏢 Editar empresa';
+  document.getElementById('edit-emp-id').value = id;
+  document.getElementById('new-emp-nombre').value = e.nombre || '';
+  document.getElementById('new-emp-cif').value = e.cif || '';
+  document.getElementById('new-emp-contacto').value = e.contacto || '';
+  document.getElementById('new-emp-email').value = e.email || '';
+  document.getElementById('new-emp-telefono').value = e.telefono || '';
+  document.getElementById('new-emp-sector').value = e.sector || '';
+  openModal('empresa');
+}
+function e_saveEmpresaModal() {
+  const nombre = document.getElementById('new-emp-nombre').value.trim();
+  if (!nombre) { showToast('⚠️ Escribe el nombre de la empresa'); return; }
+  const editId = document.getElementById('edit-emp-id').value;
+  const empresaData = {
+    nombre,
+    cif: document.getElementById('new-emp-cif').value.trim(),
+    contacto: document.getElementById('new-emp-contacto').value.trim(),
+    email: document.getElementById('new-emp-email').value.trim(),
+    telefono: document.getElementById('new-emp-telefono').value.trim(),
+    sector: document.getElementById('new-emp-sector').value.trim()
+  };
+  if (editId) {
+    const idx = empresas.findIndex(e => e.id == editId);
+    if (idx >= 0) empresas[idx] = { ...empresas[idx], ...empresaData };
+  } else {
+    empresas.push({ id: Date.now(), ...empresaData });
+  }
+  saveEmpresasDB();
+  closeModal('empresa');
+  e_renderEmpresasList();
+  showToast('✅ Empresa guardada');
+}
+function e_delEmpresa(id) {
+  if (!confirm('¿Eliminar esta empresa? No se borrarán sus visitas pasadas.')) return;
+  empresas = empresas.filter(e => e.id !== id);
+  saveEmpresasDB();
+  e_renderEmpresasList();
+}
+function e_renderEmpresasList() {
+  const search = (document.getElementById('e-empresas-search')?.value || '').toLowerCase();
+  const list = document.getElementById('e-empresas-list');
+  const filtered = empresas.filter(e => e.nombre.toLowerCase().includes(search));
+  if (empresas.length === 0) {
+    list.innerHTML = `<div class="empty-state"><span class="empty-icon">🏢</span>Aún no has añadido ninguna empresa.<br>Se añaden solas al hacer una visita, o toca "+" para añadir manualmente.</div>`;
+    return;
+  }
+  if (filtered.length === 0) { list.innerHTML = `<div class="empty-state"><span class="empty-icon">🔍</span>Sin resultados</div>`; return; }
+  list.innerHTML = filtered.map(e => {
+    const initials = e.nombre.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    const contactInfo = [e.telefono, e.email].filter(Boolean).join(' · ') || 'Sin contacto';
+    const numVisitas = visitas.filter(v => v.nombre.toLowerCase().trim() === e.nombre.toLowerCase().trim()).length;
+    return `<div class="empresa-card" onclick="e_openEditEmpresa(${e.id})">
+      <div class="empresa-avatar">${initials}</div>
+      <div class="empresa-card-info">
+        <div class="empresa-card-name">${e.nombre}</div>
+        <div class="empresa-card-contact">${contactInfo}</div>
+        ${numVisitas > 0 ? `<span class="empresa-card-badge">${numVisitas} visita${numVisitas>1?'s':''}</span>` : ''}
+      </div>
+      <button class="empresa-card-del" onclick="event.stopPropagation();e_delEmpresa(${e.id})">×</button>
+    </div>`;
+  }).join('');
+}
+
+// ==================================================================
+// ===== INIT =====
+// ==================================================================
+window.onload = () => {
+  updateHomeDashboard();
+  v_refreshEmpresaSelect();
+  document.getElementById('v-fecha-visita').placeholder = new Date().toLocaleDateString('es-ES');
+};
+</script>
+</body>
+</html>
